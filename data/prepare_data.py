@@ -47,7 +47,7 @@ def process_image(img_path: Path, target_dir: Path, size: tuple[int, int]) -> No
 
 
 def process_images_from_dir(source_dir: Path, target_dir: Path, size: tuple[int, int]=(512, 512), radius: int) -> None:
-    """Resize all PNG images in the source directory and save them to the target directory with the specified size,
+    """Process all PNG images in the source directory and save them to the target directory after processing,
     using joblib for improved performance.
 
     Parameters:
@@ -61,15 +61,15 @@ def process_images_from_dir(source_dir: Path, target_dir: Path, size: tuple[int,
     Parallel(n_jobs=-1)(delayed(resize_image)(img_path, target_dir, size, radius) for img_path in tqdm(images, desc="Processing images"))
 
 
-def parse_size(size_str):
+def parse_size(size_str: str) -> tuple[int, int]:
     """
     Parse the size string in the format WIDTHxHEIGHT into a tuple (width, height).
 
     Parameters:
-    - size_str: A string representing the size in the format WIDTHxHEIGHT.
+    - size_str (str): A string representing the size in the format WIDTHxHEIGHT.
 
     Returns:
-    A tuple (width, height).
+    - size (tuple[int, int]): A tuple (width, height).
     """
     width, height = map(int, size_str.lower().split('x'))
     return width, height
