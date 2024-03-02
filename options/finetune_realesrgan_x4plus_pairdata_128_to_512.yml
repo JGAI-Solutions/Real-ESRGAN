@@ -17,9 +17,9 @@ datasets:
   train:
     name: DIV2K
     type: RealESRGANPairedDataset
-    dataroot_gt: data/processed/train512/
-    dataroot_lq: data/processed/train128/
-    meta_info: data/processed/upscaler_metainfo.txt
+    dataroot_gt: ../data/processed/train512/
+    dataroot_lq: ../data/processed/train128/
+    meta_info: ../data/processed/upscaler_metainfo.txt
     io_backend:
       type: disk
 
