@@ -5,7 +5,8 @@ from basicsr.utils import FileClient, imfrombytes, img2tensor
 from basicsr.utils.registry import DATASET_REGISTRY
 from torch.utils import data as data
 from torchvision.transforms.functional import normalize
-
+import random
+import cv2
 
 @DATASET_REGISTRY.register()
 class RealESRGANPairedDataset(data.Dataset):
@@ -94,6 +95,11 @@ class RealESRGANPairedDataset(data.Dataset):
             img_gt, img_lq = paired_random_crop(img_gt, img_lq, gt_size, scale, gt_path)
             # flip, rotation
             img_gt, img_lq = augment([img_gt, img_lq], self.opt['use_hflip'], self.opt['use_rot'])
+            # blur low quality image
+            blur_kernel_size = random.randint(0, 5)
+            if blur_kernel_size:
+                img_lq = img_blur(img_lq, blur_kernel_size)
+
 
         # BGR to RGB, HWC to CHW, numpy to tensor
         img_gt, img_lq = img2tensor([img_gt, img_lq], bgr2rgb=True, float32=True)
@@ -106,3 +112,16 @@ class RealESRGANPairedDataset(data.Dataset):
 
     def __len__(self):
         return len(self.paths)
+
+
+def img_blur(img, size: int):
+    """
+    Blurs an image using GaussianBlur.
+
+    Args:
+        blur_strength (ndarray): tuple, the (width, height) of the Gaussian kernel; higher values mean more blur.
+
+    Returns:
+        (ndarray) The blurred image.
+    """
+    return cv2.blur(img, (size, size))
