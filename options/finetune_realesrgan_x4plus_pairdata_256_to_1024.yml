@@ -61,10 +61,10 @@ network_d:
 # path
 path:
   # use the pre-trained Real-ESRNet model
-  pretrain_network_g: experiments/finetune_RealESRGANx4plus_400k_pairdata/models/net_g_190000.pth
+  pretrain_network_g: experiments/finetune_RealESRGANx4plus_400k_pairdata_128_to_512/models/net_g_150000.pth # replace with output checkpoint of 128_to_512 training
   param_key_g: params_ema
   strict_load_g: true
-  pretrain_network_d: experiments/pretrained_models/RealESRGAN_x4plus_netD.pth
+  pretrain_network_d: experiments/finetune_RealESRGANx4plus_400k_pairdata_128_to_512/models/net_d_150000.pth # replace with output checkpoint of 128_to_512 training
   param_key_d: params
   strict_load_d: true
   resume_state: ~
@@ -88,7 +88,7 @@ train:
     milestones: [400000]
     gamma: 0.5
 
-  total_iter: 400000
+  total_iter: 150000
   warmup_iter: -1  # no warm up
 
   # losses
