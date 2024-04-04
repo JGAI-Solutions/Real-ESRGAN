@@ -96,7 +96,7 @@ class RealESRGANPairedDataset(data.Dataset):
             # flip, rotation
             img_gt, img_lq = augment([img_gt, img_lq], self.opt['use_hflip'], self.opt['use_rot'])
             # blur low quality image
-            blur_kernel_size = random.randint(0, 5)
+            blur_kernel_size = random.randint(0, 8)
             if blur_kernel_size:
                 img_lq = img_blur(img_lq, blur_kernel_size)
 
