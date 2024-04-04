@@ -3,9 +3,10 @@ from pathlib import Path
 import argparse
 from tqdm import tqdm
 from joblib import Parallel, delayed
+from typing import Tuple
 
 
-def resize_image(img: Image.Image, size: tuple[int, int]) -> Image.Image:
+def resize_image(img: Image.Image, size: Tuple[int, int]) -> Image.Image:
     """Resize an image.
     
     Parameters:
@@ -18,7 +19,7 @@ def resize_image(img: Image.Image, size: tuple[int, int]) -> Image.Image:
     return img.resize(size)
 
 
-def process_image(img_path: Path, target_dir: Path, size: tuple[int, int]) -> None:
+def process_image(img_path: Path, target_dir: Path, size: Tuple[int, int]) -> None:
     """
     Process a single image and save it to the target directory.
 
@@ -33,7 +34,7 @@ def process_image(img_path: Path, target_dir: Path, size: tuple[int, int]) -> No
         img.save(output_path)
 
 
-def process_images_from_dir(source_dir: Path, target_dir: Path, size: tuple[int, int]=(512, 512)) -> None:
+def process_images_from_dir(source_dir: Path, target_dir: Path, size: Tuple[int, int]=(512, 512)) -> None:
     """Process all PNG images in the source directory and save them to the target directory after processing,
     using joblib for improved performance.
 
@@ -44,10 +45,10 @@ def process_images_from_dir(source_dir: Path, target_dir: Path, size: tuple[int,
     """
     target_dir.mkdir(parents=True, exist_ok=True)
     images = list(source_dir.glob('*.png'))
-    Parallel(n_jobs=-1)(delayed(resize_image)(img_path, target_dir, size) for img_path in tqdm(images, desc="Processing images"))
+    Parallel(n_jobs=-1)(delayed(process_image)(img_path, target_dir, size) for img_path in tqdm(images, desc="Processing images"))
 
 
-def parse_size(size_str: str) -> tuple[int, int]:
+def parse_size(size_str: str) -> Tuple[int, int]:
     """
     Parse the size string in the format WIDTHxHEIGHT into a tuple (width, height).
 
