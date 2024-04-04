@@ -51,7 +51,9 @@ def main():
         help='Image extension. Options: auto | jpg | png, auto means using the same extension as inputs')
     parser.add_argument(
         '-g', '--gpu-id', type=int, default=None, help='gpu device to use (default=None) can be 0,1,2 for multi-gpu')
-
+    parser.add_argument(
+        '--resize_input_image', type=int, default=None, help="use this param if you want to resize, by default it doesn't resize input image"
+    )
     args = parser.parse_args()
 
     # determine models according to model names
@@ -135,6 +137,8 @@ def main():
         print('Testing', idx, imgname)
 
         img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
+        if args.resize_input_image:
+            img = cv2.resize(img, (args.resize_input_image, args.resize_input_image))
         if len(img.shape) == 3 and img.shape[2] == 4:
             img_mode = 'RGBA'
         else:
