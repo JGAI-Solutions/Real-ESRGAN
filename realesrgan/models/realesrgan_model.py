@@ -3,7 +3,8 @@ import random
 import torch
 from basicsr.data.degradations import random_add_gaussian_noise_pt, random_add_poisson_noise_pt
 from basicsr.data.transforms import paired_random_crop
-from basicsr.models.srgan_model import SRGANModel
+from basicsr.models.srgan_model import SRGANModel, build_network
+from basicsr.models.base_model import BaseModel
 from basicsr.utils import DiffJPEG, USMSharp
 from basicsr.utils.img_process_util import filter2D
 from basicsr.utils.registry import MODEL_REGISTRY
@@ -12,7 +13,7 @@ from torch.nn import functional as F
 
 
 @MODEL_REGISTRY.register()
-class RealESRGANModel(SRGANModel):
+class RealESRGANModel(SRGANModel, BaseModel):
     """RealESRGAN Model for Real-ESRGAN: Training Real-World Blind Super-Resolution with Pure Synthetic Data.
 
     It mainly performs:
@@ -21,9 +22,22 @@ class RealESRGANModel(SRGANModel):
     """
 
     def __init__(self, opt):
-        super(RealESRGANModel, self).__init__(opt)
+        BaseModel.__init__(self, opt)
+        # define network
+        self.net_g = build_network(opt['network_g'])
+        self.print_network(self.net_g)
+
+        # load pretrained models
+        load_path = self.opt['path'].get('pretrain_network_g', None)
+        if load_path is not None:
+            param_key = self.opt['path'].get('param_key_g', 'params')
+            self.load_network(self.net_g, load_path, self.opt['path'].get('strict_load_g', True), param_key)
+
+        if self.is_train:
+            self.init_training_settings()
         self.jpeger = DiffJPEG(differentiable=False).cuda()  # simulate JPEG compression artifacts
         self.usm_sharpener = USMSharp().cuda()  # do usm sharpening
+        self.net_g = self.model_to_device(self.net_g)
         self.queue_size = opt.get('queue_size', 180)
 
     @torch.no_grad()
@@ -256,3 +270,16 @@ class RealESRGANModel(SRGANModel):
             self.model_ema(decay=self.ema_decay)
 
         self.log_dict = self.reduce_loss_dict(loss_dict)
+
+    def setup_optimizers(self):
+        train_opt = self.opt['train']
+        # optimizer g
+        optim_type = train_opt['optim_g'].pop('type')
+        for p in self.net_g.body.parameters():
+            p.requires_grad = False
+        self.optimizer_g = self.get_optimizer(optim_type, filter(lambda p: p.requires_grad, self.net_g.parameters()), **train_opt['optim_g'])
+        self.optimizers.append(self.optimizer_g)
+        # optimizer d
+        optim_type = train_opt['optim_d'].pop('type')
+        self.optimizer_d = self.get_optimizer(optim_type, self.net_d.parameters(), **train_opt['optim_d'])
+        self.optimizers.append(self.optimizer_d)
