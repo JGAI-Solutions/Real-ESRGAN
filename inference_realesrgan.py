@@ -51,7 +51,7 @@ def main():
         help='Image extension. Options: auto | jpg | png, auto means using the same extension as inputs')
     parser.add_argument(
         '-g', '--gpu-id', type=int, default=None, help='gpu device to use (default=None) can be 0,1,2 for multi-gpu')
-
+    parser.add_argument('-ds', '--downscale', type=float, default=4, help='The downsizing scale of the image before the upscaling.')
     args = parser.parse_args()
 
     # determine models according to model names
@@ -135,6 +135,10 @@ def main():
         print('Testing', idx, imgname)
 
         img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
+        if args.downscale > 1:
+            size = img.shape
+            img = cv2.resize(img, (int(size[0]/args.downscale), int(size[1]/args.downscale)))
+
         if len(img.shape) == 3 and img.shape[2] == 4:
             img_mode = 'RGBA'
         else:

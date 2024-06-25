@@ -2,7 +2,7 @@
 name: finetune_RealESRGANx4plus_400k_pairdata_128_to_512
 model_type: RealESRGANModel
 scale: 4
-num_gpu: 4
+num_gpu: 2
 manual_seed: 0
 
 # USM the ground-truth
@@ -17,9 +17,9 @@ datasets:
   train:
     name: DIV2K
     type: RealESRGANPairedDataset
-    dataroot_gt: ../data/processed/train512/
-    dataroot_lq: ../data/processed/train128/
-    meta_info: ../data/processed/upscaler_metainfo.txt
+    dataroot_gt: ../data/processed/upscaler/train512/
+    dataroot_lq: ../data/processed/upscaler/train128/
+    meta_info: ../data/processed/upscaler/upscaler_metainfo.txt
     io_backend:
       type: disk
 
@@ -29,7 +29,7 @@ datasets:
 
     # data loader
     use_shuffle: true
-    num_worker_per_gpu: 5
+    num_worker_per_gpu: 4
     batch_size_per_gpu: 4
     dataset_enlarge_ratio: 1
     prefetch_mode: ~
